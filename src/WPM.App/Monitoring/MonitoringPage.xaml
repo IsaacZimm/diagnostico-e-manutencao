@@ -1,0 +1,144 @@
+<UserControl x:Class="WPM.App.Monitoring.MonitoringPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Language="pt-BR">
+    <UserControl.Resources>
+        <DataTemplate x:Key="MeasurementRow">
+            <Border Padding="0,6" BorderBrush="{DynamicResource Divider}" BorderThickness="0,1,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Resource}" Style="{DynamicResource PanelText}" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding Reading}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid x:Name="SensorsPanel" Margin="28,24,28,13" MaxWidth="1300">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="Sensores ao vivo" Style="{DynamicResource PageTitle}" />
+                <TextBlock x:Name="SensorsStatus" Style="{DynamicResource PanelText}" Text="Consultando o hardware…" Margin="0,2,0,10" />
+                <WrapPanel>
+                    <Label Content="_Tipo de leitura" Target="{Binding ElementName=SensorFilter}" Padding="0,5,8,3" />
+                    <ComboBox x:Name="SensorFilter" MinWidth="160" VerticalContentAlignment="Center" Margin="0,0,14,4" />
+                    <CheckBox x:Name="AvailableOnly" Content="Somente sensores com leitura" VerticalAlignment="Center"
+                              VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                </WrapPanel>
+            </StackPanel>
+            <Border Grid.Row="1" Style="{DynamicResource Panel}" Padding="0" Margin="0" ClipToBounds="True">
+                <DataGrid x:Name="SensorTable" AutoGenerateColumns="False" IsReadOnly="True"
+                          HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserReorderColumns="False" EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                          BorderThickness="0" GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{DynamicResource Divider}" Background="{DynamicResource Surface}"
+                          RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource WindowBackground}"
+                          MinRowHeight="28" AlternationCount="2" SelectionMode="Single" SelectionUnit="FullRow"
+                          AutomationProperties.Name="Leituras atuais, mínimas e máximas">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Componente" Binding="{Binding Device}" Width="1.4*" MinWidth="125" />
+                        <DataGridTextColumn Header="Sensor" Binding="{Binding Name}" Width="1.6*" MinWidth="125" />
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding Category}" Width="95" />
+                        <DataGridTextColumn Header="Atual" Binding="{Binding Current}" SortMemberPath="Value" Width="110" />
+                        <DataGridTextColumn Header="Mínima" Binding="{Binding Minimum}" Width="105" />
+                        <DataGridTextColumn Header="Máxima" Binding="{Binding Maximum}" Width="105" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+
+        <ScrollViewer x:Name="BottleneckPanel" Visibility="Collapsed" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled" Padding="28,24,28,13">
+            <StackPanel MaxWidth="1150">
+                <TextBlock Text="Análise de gargalo" Style="{DynamicResource PageTitle}" />
+                <TextBlock Text="Inicie a coleta e use o jogo. O resumo mostra a frequência dos indícios de saturação de cada recurso."
+                           Style="{DynamicResource PanelText}" Margin="0,2,0,17" />
+                <Border Style="{DynamicResource Panel}">
+                    <StackPanel>
+                        <TextBlock Text="Sessão de análise" Style="{DynamicResource PanelTitle}" />
+                        <WrapPanel Margin="0,10,0,0">
+                            <Label Content="_Duração" Target="{Binding ElementName=Duration}" Padding="0,7,8,3" />
+                            <ComboBox x:Name="Duration" MinWidth="118" SelectedIndex="0" VerticalContentAlignment="Center" Margin="0,0,10,4">
+                                <ComboBoxItem Content="1 minuto" Tag="1" />
+                                <ComboBoxItem Content="3 minutos" Tag="3" />
+                                <ComboBoxItem Content="5 minutos" Tag="5" />
+                                <ComboBoxItem Content="10 minutos" Tag="10" />
+                            </ComboBox>
+                            <Button x:Name="StartSessionButton" Content="Iniciar análise" Style="{DynamicResource ActionButton}"
+                                    Click="StartSession_Click" Margin="0,0,8,4" />
+                            <Button x:Name="EndSessionButton" Content="Encerrar análise" Style="{DynamicResource SecondaryButton}"
+                                    Click="EndSession_Click" IsEnabled="False" Margin="0,0,0,4" />
+                        </WrapPanel>
+                        <CheckBox x:Name="SessionFrames" IsChecked="True" Content="Medir FPS de apresentação (DXGI / Direct3D 9)"
+                                  VerticalContentAlignment="Center" Margin="0,5,0,0" />
+                        <ProgressBar x:Name="SessionProgress" Style="{DynamicResource MetricProgress}" Margin="0,12,0,2"
+                                     AutomationProperties.Name="Progresso da sessão de análise" />
+                        <TextBlock x:Name="SessionStatus" Text="Nenhuma análise em andamento." Style="{DynamicResource PanelText}"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock x:Name="SessionFrameStatus" Style="{DynamicResource PanelText}" />
+                        <ItemsControl x:Name="SessionResults" ItemTemplate="{StaticResource MeasurementRow}" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{DynamicResource Panel}">
+                    <StackPanel>
+                        <TextBlock Text="Amostra mais recente" Style="{DynamicResource PanelTitle}" />
+                        <TextBlock x:Name="CurrentAssessment" Text="Aguardando leituras do hardware…" Style="{DynamicResource PanelText}" />
+                        <ItemsControl x:Name="LiveReadings" ItemTemplate="{StaticResource MeasurementRow}" Margin="0,9,0,0" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer x:Name="OverlayPanel" Visibility="Collapsed" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled" Padding="28,24,28,13">
+            <StackPanel MaxWidth="1150">
+                <TextBlock Text="HUD de desempenho" Style="{DynamicResource PageTitle}" />
+                <TextBlock Text="Escolha os indicadores que ficam visíveis sobre os jogos em modo janela ou janela sem bordas."
+                           Style="{DynamicResource PanelText}" Margin="0,2,0,17" />
+                <Border Style="{DynamicResource Panel}">
+                    <StackPanel>
+                        <TextBlock Text="Aparência" Style="{DynamicResource PanelTitle}" />
+                        <WrapPanel Margin="0,10,0,8">
+                            <Label Content="_Posição" Target="{Binding ElementName=HudCorner}" Padding="0,7,8,3" />
+                            <ComboBox x:Name="HudCorner" SelectedIndex="1" MinWidth="144" VerticalContentAlignment="Center" Margin="0,0,15,4">
+                                <ComboBoxItem Content="Superior esquerdo" />
+                                <ComboBoxItem Content="Superior direito" />
+                                <ComboBoxItem Content="Inferior esquerdo" />
+                                <ComboBoxItem Content="Inferior direito" />
+                            </ComboBox>
+                            <Label Content="_Cor de destaque" Target="{Binding ElementName=HudTint}" Padding="0,7,8,3" />
+                            <ComboBox x:Name="HudTint" SelectedIndex="0" MinWidth="95" VerticalContentAlignment="Center" Margin="0,0,0,4">
+                                <ComboBoxItem Content="Verde-água" Tag="#8EE6D0" />
+                                <ComboBoxItem Content="Branco" Tag="#FFFFFF" />
+                                <ComboBoxItem Content="Azul" Tag="#9AC7FF" />
+                                <ComboBoxItem Content="Laranja" Tag="#FFD190" />
+                                <ComboBoxItem Content="Rosa" Tag="#FFA6C7" />
+                            </ComboBox>
+                        </WrapPanel>
+                        <TextBlock Text="Indicadores" Style="{DynamicResource PanelTitle}" FontSize="17" Margin="0,4,0,8" />
+                        <WrapPanel x:Name="HudMetricsOptions">
+                            <CheckBox x:Name="HudFps" Content="FPS de apresentação" IsChecked="True" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudFrameTimes" Content="Tempo de quadro" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudCpu" Content="CPU" IsChecked="True" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudGpu" Content="GPU" IsChecked="True" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudMemory" Content="RAM e memória da GPU" IsChecked="True" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudTemperatures" Content="Temperaturas" IsChecked="True" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudClocks" Content="Clocks" Margin="0,0,15,10" />
+                            <CheckBox x:Name="HudPower" Content="Potência" Margin="0,0,15,10" />
+                        </WrapPanel>
+                        <Button x:Name="HudToggle" Content="Mostrar HUD" Style="{DynamicResource ActionButton}"
+                                HorizontalAlignment="Left" Click="HudToggle_Click" Margin="0,4,0,0" />
+                        <TextBlock x:Name="HudStatus" Text="HUD oculto." Style="{DynamicResource PanelText}"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock x:Name="HudFrameStatus" Style="{DynamicResource PanelText}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
