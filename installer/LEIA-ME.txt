@@ -1,0 +1,21 @@
+OTIMIZADOR
+
+Aplicativo para Windows 10 ou 11 em processadores Intel/AMD x64.
+O instalador inclui o .NET 10 Desktop Runtime.
+
+Abra Otimizador pelo menu Iniciar e confirme a solicitação de administrador.
+Para remover o aplicativo, use Configurações > Aplicativos instalados.
+
+Em Ferramentas > Reparo do Windows, escolha um atalho ou os comandos individuais.
+A tela mostra os comandos na ordem de execução. Se marcar a opção de reiniciar
+após o reparo, você terá 30 segundos para cancelar quando a sequência terminar.
+
+Os sensores disponíveis dependem do hardware. Algumas leituras internas da CPU
+usam o driver opcional PawnIO. Para instalar com o WinGet:
+    winget install --id namazso.PawnIO --exact --source winget
+
+Em Maker > Drivers seriais, use as páginas dos fabricantes para obter os drivers.
+Para usar o catálogo Instalar apps, é preciso ter o WinGet disponível.
+
+Documentação e atualizações:
+https://github.com/IsaacZimm/diagnostico-e-manutencao

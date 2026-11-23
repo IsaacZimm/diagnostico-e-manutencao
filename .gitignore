@@ -3,3 +3,5 @@
 artifacts/
 .vs/
 *.user
+src/Otimizador/Drivers/
+src/Otimizador/Native/

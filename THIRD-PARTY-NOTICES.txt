@@ -23,6 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Licenças das bibliotecas binárias são fornecidas na pasta licenses.
+O instalador foi gerado com NSIS e usa sua compressão zlib. Veja licenses/NSIS.txt.
+O shader de ray tracing acompanha seu código-fonte em src/Otimizador/Shaders;
+o compilador de shaders não faz parte do instalador.
 
 Código-fonte das bibliotecas de hardware sob MPL-2.0
 
